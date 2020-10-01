@@ -1,0 +1,17 @@
+{
+    "name": "DQR.Utils",
+    "references": [
+        "GUID:20ee313e09faec446a26ffa1daf5636b",
+        "GUID:fed1b9451fde4474bbc2aad5bda39aca",
+        "GUID:763296ee42f3f404aadd6c58c79ab09a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+    "name": "DQR.ImGuiExt",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "IMGUI_FEATURE_CUSTOM_ASSERT",
+        "IMGUI_FEATURE_FREETYPE"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
