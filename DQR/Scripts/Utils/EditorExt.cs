@@ -176,6 +176,69 @@ namespace DQR
 			list.serializedObject.ApplyModifiedProperties();
 		}
 
+		public static bool KeyValuePairField(ref Rect position, SerializedProperty keyProp, SerializedProperty valueProp, string buttonText = null)
+		{
+			Rect kvpArea, buttonArea;
+			if (buttonText != null)
+			{
+				EditorExt.SplitColumnsPixelsFromRight(position, 20.0f, out kvpArea, out buttonArea);
+			}
+			else
+			{
+				kvpArea = position;
+				buttonArea = new Rect();
+			}
+			
+			// Draw KVP
+			{
+				Rect lhs, rhs;
+				EditorExt.SplitColumnsPercentage(kvpArea, 0.3f, out lhs, out rhs);
+
+				float origLabelWidth = EditorGUIUtility.labelWidth;
+
+				lhs.height = EditorGUI.GetPropertyHeight(keyProp);
+				rhs.height = EditorGUI.GetPropertyHeight(valueProp);
+
+				EditorGUIUtility.labelWidth = 0.001f;
+				EditorGUI.PropertyField(lhs, keyProp, new GUIContent("Key"), true);
+
+				if (EditorGUI.GetPropertyHeight(valueProp) <= EditorExt.GetRowHeight())
+				{
+					EditorGUIUtility.labelWidth = 0.001f;
+				}
+				else
+				{
+					EditorGUIUtility.labelWidth = origLabelWidth * 0.6f;
+				}
+				EditorGUI.PropertyField(rhs, valueProp, new GUIContent("Value"), true);
+
+				EditorGUIUtility.labelWidth = origLabelWidth;
+
+				float maxHeight = Mathf.Max(lhs.height, rhs.height);
+
+				if (maxHeight > position.height)
+				{
+					float delta = maxHeight - position.height;
+					position.y += delta;
+				}
+			}
+
+			if (buttonText != null && GUI.Button(buttonArea, buttonText))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		public static float KeyValuePairHeight(SerializedProperty keyProp, SerializedProperty valueProp, int rowHeight = 1)
+		{
+			float keyHeight = keyProp.isExpanded ? EditorExt.GetRowHeight(rowHeight) : EditorGUI.GetPropertyHeight(keyProp);
+			float valueHeight = valueProp.isExpanded ? EditorExt.GetRowHeight(rowHeight) : EditorGUI.GetPropertyHeight(valueProp);
+
+			return Mathf.Max(keyHeight, valueHeight);
+		}
+
 		public static void SetPropertyValue(this SerializedProperty property, object value)
 		{
 			switch (property.propertyType)

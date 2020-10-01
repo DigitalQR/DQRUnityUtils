@@ -70,6 +70,21 @@ namespace DQR.Voxel.Common
 		}
 
 
+		public bool BlendVoxelMaterial(IVoxelVolume volume, int x, int y, int z, VoxelMaterial material, float strength)
+		{
+			// TODO - May need to optimize this to prevent blends being created excessively
+			VoxelMaterial baseMaterial = GetVoxelMaterial(volume, x, y, z);
+			VoxelMaterial blendedMaterial = VoxelMaterial.Lerp(baseMaterial, material, strength);
+
+			return volume.SetVoxelCell(x, y, z, VoxelMaterialToCell(blendedMaterial));
+		}
+
+		public bool BlendVoxelMaterial(IVoxelVolume volume, Vector3Int coord, VoxelMaterial material, float strength)
+		{
+			return BlendVoxelMaterial(volume, coord.x, coord.y, coord.z, material, strength);
+		}
+
+
 		public VoxelVertexOutput ResolveVoxelVertex(VoxelVertexInput input, VoxelModelGenerationSettings settings)
 		{
 			VoxelVertexOutput output = new VoxelVertexOutput();

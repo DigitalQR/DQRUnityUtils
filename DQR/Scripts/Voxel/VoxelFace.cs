@@ -24,7 +24,8 @@ namespace DQR.Voxel
 		Left = 4,
 		Right = 8,
 		Front = 16,
-		Back = 32
+		Back = 32,
+		All = Top | Bottom | Left | Right | Front | Back
 	}
 
 	public static class VoxelFaceHelpers
