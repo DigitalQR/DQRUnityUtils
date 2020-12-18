@@ -95,7 +95,7 @@ namespace DQR.Voxel.Common
 
 			if (mat != null)
 			{
-				mat.Properties.ApplyToVertex(input, ref output);
+				mat.ApplyToVertex(input, ref output);
 			}
 			
 			return output;
@@ -103,7 +103,7 @@ namespace DQR.Voxel.Common
 
 		public bool ShouldAddFace(Vector3Int fromCoord, VoxelCell fromCell, Vector3Int toCoord, VoxelCell toCell)
 		{
-			return VoxelMaterial.ShouldGenerateFaceBetween(VoxelCellToMaterial(fromCell), VoxelCellToMaterial(toCell));
+			return VoxelMaterial.ShouldGenerateFaceBetween(VoxelFaceHelpers.NormalToFace(toCoord - fromCoord), VoxelCellToMaterial(fromCell), VoxelCellToMaterial(toCell));
 		}
 
 		public bool ShouldConsiderForModel(Vector3Int coord, VoxelCell cell)

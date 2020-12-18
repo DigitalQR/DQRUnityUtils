@@ -30,19 +30,41 @@ namespace DQR
 			
 			//BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 			BuildTargetGroup buildTarget = EditorUserBuildSettings.selectedBuildTargetGroup;
-			List<string> currentDefines = new List<string>(PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTarget).Split(';'));
 			
-			if (EditorUserBuildSettings.development)
+			var splitDefines = new HashSet<string>(PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTarget).Split(';'));
+
+			// Strip any previous DQR defines
+			// DQR_MANUAL_... used to maintain DQR specific defines
+			// -DQR_MANUAL_OVERRIDE_DEFINES: Disables auto defines below (Allowing anything to be specified in settings)
+			HashSet<string> currentDefines = new HashSet<string>(splitDefines.Where((define) => !define.StartsWith("DQR_") || define.StartsWith("DQR_MANUAL_")));
+			
+			if (!currentDefines.Contains("DQR_MANUAL_OVERRIDE_DEFINES"))
 			{
-				currentDefines.Add("DQR_DEV");
-
-				//if (EditorUserBuildSettings.enableHeadlessMode) // Disable in server builds?
+				var req = Client.Search("com.realgames.dear-imgui", true);
+				
+				if (EditorUserBuildSettings.development)
 				{
-					currentDefines.Add("DQR_ASSERTS");
-				}
-			}
+					currentDefines.Add("DQR_DEV");
 
-			PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTarget, string.Join(";", currentDefines));
+					//if (EditorUserBuildSettings.enableHeadlessMode) // Disable in server builds?
+					{
+						currentDefines.Add("DQR_ASSERTS");
+					}
+				}
+
+				// Wait here for request to finish
+				while (!req.IsCompleted)
+				{
+					Thread.Yield();
+				}
+
+				if (req.Status == StatusCode.Success)
+				{
+					currentDefines.Add("DQR_FEATURE_DEAR_IMGUI");
+				}
+
+				PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTarget, string.Join(";", currentDefines));
+			}
 		}
 #endif
 

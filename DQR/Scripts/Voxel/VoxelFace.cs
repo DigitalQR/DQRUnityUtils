@@ -30,6 +30,28 @@ namespace DQR.Voxel
 
 	public static class VoxelFaceHelpers
 	{
+		public static VoxelFace ToOppositeFace(this VoxelFace face)
+		{
+			switch (face)
+			{
+				case (VoxelFace.Top):
+					return VoxelFace.Bottom;
+				case (VoxelFace.Bottom):
+					return VoxelFace.Top;
+				case (VoxelFace.Left):
+					return VoxelFace.Right;
+				case (VoxelFace.Right):
+					return VoxelFace.Left;
+				case (VoxelFace.Front):
+					return VoxelFace.Back;
+				case (VoxelFace.Back):
+					return VoxelFace.Front;
+				default:
+					Debug.Assert.FailMessage("Invalid face");
+					return VoxelFace.Top;
+			}
+		}
+
 		public static VoxelFaces ToFaces(this VoxelFace face)
 		{
 			switch (face)

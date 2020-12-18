@@ -27,13 +27,13 @@ namespace DQR.Voxel.Common
 		{
 		}
 
-		public static bool ShouldGenerateFaceBetween(VoxelMaterial a, VoxelMaterial b)
+		public static bool ShouldGenerateFaceBetween(VoxelFace fromFace, VoxelMaterial fromMat, VoxelMaterial toMat)
 		{
-			if (a != null && b != null)
-				return a.Properties.IsOpaque != b.Properties.IsOpaque;
+			if (fromMat != null && toMat != null)
+				return fromMat.GetFaceProperties(fromFace).MaterialProperties.IsOpaque != toMat.GetFaceProperties(fromFace.ToOppositeFace()).MaterialProperties.IsOpaque;
 
 			// One of or both are null if here, so assume one is empty
-			else if (a != null || b != null)
+			else if (fromMat != null || toMat != null)
 				return true;
 			
 			return false;
@@ -68,6 +68,12 @@ namespace DQR.Voxel.Common
 			return output;
 		}
 
+		public void ApplyToVertex(VoxelVertexInput input, ref VoxelVertexOutput output)
+		{
+			VoxelFace face = VoxelFaceHelpers.NormalToFace(input.Normal);
+			GetFaceProperties(face).MaterialProperties.ApplyToVertex(input, ref output);
+		}
+
 		public void OnBeforeSerialize()
 		{
 		}
@@ -76,10 +82,13 @@ namespace DQR.Voxel.Common
 		{
 			m_FaceProperties = new Dictionary<VoxelFace, FaceProperties>();
 
-			foreach (var prop in m_Properties)
+			if (m_Properties != null)
 			{
-				foreach (var face in prop.AffectedFaces.ToFaceCollection())
-					m_FaceProperties[face] = prop;
+				foreach (var prop in m_Properties)
+				{
+					foreach (var face in prop.AffectedFaces.ToFaceCollection())
+						m_FaceProperties[face] = prop;
+				}
 			}
 		}
 	}
