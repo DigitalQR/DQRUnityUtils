@@ -193,7 +193,7 @@ namespace DQR.Voxel.Common
 		public VoxelVertexOutput ResolveVoxelVertex(VoxelVertexInput input, VoxelModelGenerationSettings settings)
 		{
 			float[] channels = ReadAllChannels(input.Coord);
-			VoxelMaterialBasic material = new VoxelMaterialBasic();
+			VoxelMaterialProperties material = new VoxelMaterialProperties();
 			List<Vector4> customUVs = new List<Vector4>();
 			
 			int c = 0;

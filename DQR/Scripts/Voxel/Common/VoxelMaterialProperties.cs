@@ -6,7 +6,7 @@ using UnityEngine;
 namespace DQR.Voxel.Common
 {
 	[System.Serializable]
-	public struct VoxelMaterialBasic : System.IEquatable<VoxelMaterialBasic>
+	public struct VoxelMaterialProperties : System.IEquatable<VoxelMaterialProperties>
 	{
 		public Color Colour;
 
@@ -43,6 +43,18 @@ namespace DQR.Voxel.Common
 		public bool IsOpaque
 		{
 			get => !IsTransparent;
+		}
+
+		public static bool ShouldGenerateFaceBetween(VoxelMaterialProperties a, VoxelMaterialProperties b)
+		{
+			if (a != null && b != null)
+				return a.IsOpaque != b.IsOpaque;
+
+			// One of or both are null if here, so assume one is empty
+			else if (a != null || b != null)
+				return true;
+
+			return false;
 		}
 
 		public void ApplyToVertex(VoxelVertexInput input, ref VoxelVertexOutput target)
@@ -82,9 +94,9 @@ namespace DQR.Voxel.Common
 			}
 		}
 
-		public static VoxelMaterialBasic Lerp(VoxelMaterialBasic a, VoxelMaterialBasic b, float t)
+		public static VoxelMaterialProperties Lerp(VoxelMaterialProperties a, VoxelMaterialProperties b, float t)
 		{
-			VoxelMaterialBasic output = new VoxelMaterialBasic();
+			VoxelMaterialProperties output = new VoxelMaterialProperties();
 			output.Colour = Color.Lerp(a.Colour, b.Colour, t);
 			output.Tint = Vector4.Lerp(a.Tint, b.Tint, t);
 			output.Specular = Mathf.Lerp(a.Specular, b.Specular, t);
@@ -107,7 +119,7 @@ namespace DQR.Voxel.Common
 			return output;
 		}
 
-		public bool Equals(VoxelMaterialBasic other)
+		public bool Equals(VoxelMaterialProperties other)
 		{
 			return Colour == other.Colour &&
 				Tint == other.Tint &&
@@ -118,8 +130,8 @@ namespace DQR.Voxel.Common
 
 		public override bool Equals(object obj)
 		{
-			if (obj is VoxelMaterialBasic)
-				return Equals((VoxelMaterialBasic)obj);
+			if (obj is VoxelMaterialProperties)
+				return Equals((VoxelMaterialProperties)obj);
 
 			return false;
 		}
@@ -137,12 +149,12 @@ namespace DQR.Voxel.Common
 			return hash;
 		}
 
-		public static bool operator==(VoxelMaterialBasic a, VoxelMaterialBasic b)
+		public static bool operator==(VoxelMaterialProperties a, VoxelMaterialProperties b)
 		{
 			return a.Equals(b);
 		}
 
-		public static bool operator!=(VoxelMaterialBasic a, VoxelMaterialBasic b)
+		public static bool operator!=(VoxelMaterialProperties a, VoxelMaterialProperties b)
 		{
 			return !a.Equals(b);
 		}
