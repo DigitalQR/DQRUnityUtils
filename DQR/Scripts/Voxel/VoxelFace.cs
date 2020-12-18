@@ -30,6 +30,27 @@ namespace DQR.Voxel
 
 	public static class VoxelFaceHelpers
 	{
+		public static VoxelFaces ToFaces(this VoxelFace face)
+		{
+			switch (face)
+			{
+				case (VoxelFace.Top):
+					return VoxelFaces.Top;
+				case (VoxelFace.Bottom):
+					return VoxelFaces.Bottom;
+				case (VoxelFace.Left):
+					return VoxelFaces.Left;
+				case (VoxelFace.Right):
+					return VoxelFaces.Right;
+				case (VoxelFace.Front):
+					return VoxelFaces.Front;
+				case (VoxelFace.Back):
+					return VoxelFaces.Back;
+				default:
+					return VoxelFaces.None;
+			}
+		}
+
 		public static IEnumerable<VoxelFace> ToFaceCollection(this VoxelFaces faces)
 		{
 			List<VoxelFace> output = new List<VoxelFace>();

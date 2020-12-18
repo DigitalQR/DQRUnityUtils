@@ -120,6 +120,26 @@ namespace DQR.Types
 				Insert(weightPerItem, item);
 		}
 
+		public static WeightedCollection<T> Lerp(WeightedCollection<T> a, WeightedCollection<T> b, float t)
+		{
+			if (t <= 0.0f)
+				return a;
+			else if (t >= 1.0f)
+				return b;
+			else
+			{
+				WeightedCollection<T> output = new WeightedCollection<T>();
+
+				foreach (var elem in a.GetScaledWeightedItems(1.0f - t))
+					output.Insert(elem.Weight, elem.Item);
+
+				foreach (var elem in b.GetScaledWeightedItems(t))
+					output.Insert(elem.Weight, elem.Item);
+
+				return output;
+			}
+		}
+
 		[System.Serializable]
 		private struct SerializedItem
 		{
