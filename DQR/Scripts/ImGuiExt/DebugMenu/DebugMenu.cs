@@ -1,14 +1,7 @@
-﻿#if IMGUI_FEATURE_CUSTOM_ASSERT || IMGUI_FEATURE_FREETYPE
-#define IMGUI_SUPPORTED
-#endif
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-#if IMGUI_SUPPORTED
 using ImGuiNET;
-#endif
 
 public class DebugMenu : MonoBehaviour, IDebugMenu
 {
