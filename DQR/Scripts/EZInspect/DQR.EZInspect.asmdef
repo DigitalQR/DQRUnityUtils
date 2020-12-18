@@ -1,10 +1,10 @@
 {
-    "name": "DQR.ImGuiExt",
+    "name": "DQR.EZInspect",
     "references": [
+        "GUID:54fe340820af2a446909b25209028de8",
         "GUID:20ee313e09faec446a26ffa1daf5636b",
         "GUID:fed1b9451fde4474bbc2aad5bda39aca",
-        "GUID:763296ee42f3f404aadd6c58c79ab09a",
-        "GUID:54fe340820af2a446909b25209028de8"
+        "GUID:763296ee42f3f404aadd6c58c79ab09a"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,7 +13,8 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "DQR_FEATURE_DEAR_IMGUI"
+        "DQR_SUPPORTED_DEAR_IMGUI",
+        "DQR_FEATURE_EZINSPECT"
     ],
     "versionDefines": [],
     "noEngineReferences": false

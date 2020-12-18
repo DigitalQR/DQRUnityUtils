@@ -4,7 +4,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace DQR.Debug
+namespace DQR
 {
 	public static class Assert
 	{

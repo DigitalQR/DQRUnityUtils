@@ -8,8 +8,6 @@ using UnityEditor;
 using UnityEditor.Build;
 #endif
 
-using DQR.Debug;
-
 namespace DQR.Database
 {
 	[System.Serializable]

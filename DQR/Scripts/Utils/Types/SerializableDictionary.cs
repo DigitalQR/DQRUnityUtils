@@ -4,8 +4,6 @@ using UnityEngine;
 using System;
 using System.Linq;
 
-using DQR.Debug;
-
 namespace DQR.Types
 {
 	/// <summary>

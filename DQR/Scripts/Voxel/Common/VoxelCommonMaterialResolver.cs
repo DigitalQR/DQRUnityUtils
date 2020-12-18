@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using DQR.Debug;
-
 namespace DQR.Voxel.Common
 {
 	public class VoxelCommonMaterialResolver : IVoxelMaterialResolver

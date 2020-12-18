@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using DQR.Debug;
-
 namespace DQR.Types
 {
 	public abstract class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<T>

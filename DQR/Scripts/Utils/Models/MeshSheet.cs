@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using DQR.Debug;
-
 namespace DQR.Models
 {
 	[System.Serializable]

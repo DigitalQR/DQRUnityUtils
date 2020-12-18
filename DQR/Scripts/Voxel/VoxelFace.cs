@@ -47,7 +47,7 @@ namespace DQR.Voxel
 				case (VoxelFace.Back):
 					return VoxelFace.Front;
 				default:
-					Debug.Assert.FailMessage("Invalid face");
+					Assert.FailMessage("Invalid face");
 					return VoxelFace.Top;
 			}
 		}
