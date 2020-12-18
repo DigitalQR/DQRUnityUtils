@@ -40,6 +40,10 @@ namespace DQR
 #if UNITY_EDITOR
 		public static DQRBuildSettings GetOrCreateSettings()
 		{
+			if (!AssetDatabase.IsValidFolder("Assets/DQR"))
+			{
+				AssetDatabase.CreateFolder("Assets", "DQR");
+			}
 			if (!AssetDatabase.IsValidFolder("Assets/DQR/Generated"))
 			{
 				AssetDatabase.CreateFolder("Assets/DQR", "Generated");
