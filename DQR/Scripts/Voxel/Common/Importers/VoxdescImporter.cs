@@ -12,8 +12,8 @@ using DQR.Types;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 
-[UnityEditor.AssetImporters.ScriptedImporter(1, "voxdesc")]
-public class VoxdescImporter : UnityEditor.AssetImporters.ScriptedImporter
+[ScriptedImporter(1, "voxdesc")]
+public class VoxdescImporter : ScriptedImporter
 {
 	public enum LayoutOrientation
 	{
@@ -28,7 +28,7 @@ public class VoxdescImporter : UnityEditor.AssetImporters.ScriptedImporter
 	private CommonVoxelImportSettings m_ImportSettings = new CommonVoxelImportSettings();
 	
 
-	public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
+	public override void OnImportAsset(AssetImportContext ctx)
 	{
 		// Attempt to generate models for each frame
 		string expectedImage = Path.Combine(Path.GetDirectoryName(ctx.assetPath), Path.GetFileNameWithoutExtension(ctx.assetPath));

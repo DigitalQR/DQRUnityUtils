@@ -69,12 +69,15 @@ namespace DQR
 #endif
 		}
 
+#if UNITY_EDITOR
 		internal static SerializedObject GetSerializedSettings()
 		{
 			return new SerializedObject(GetOrCreateSettings());
 		}
+#endif
 	}
 
+#if UNITY_EDITOR
 	internal class DQRBuildSettingsProvider : SettingsProvider
 	{
 		private SerializedObject m_SerializedSettings;
@@ -118,8 +121,6 @@ namespace DQR
 		[SettingsProvider]
 		public static SettingsProvider CreateSmartNSSettingsProvider()
 		{
-			//DQRBuildSettings.GetOrCreateSettings();
-
 			if (IsSettingsAvailable())
 			{
 				var provider = new DQRBuildSettingsProvider("Project/DQRUtils", SettingsScope.Project);
@@ -131,4 +132,5 @@ namespace DQR
 			return null;
 		}
 	}
+#endif
 }
