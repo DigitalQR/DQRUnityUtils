@@ -39,14 +39,17 @@ public class AssertRecord
 
 		int result = -1;
 
+#if UNITY_EDITOR
 		if (DQRUtils.InMainThread)
 		{
+			// TODO - Hook MessageBox or alt
 			if (Debugger.IsAttached)
 				result = UnityEditor.EditorUtility.DisplayDialogComplex("ASSERT", liteMessage, "Continue", "Mute", "Debug Break");
 			else
 				result = UnityEditor.EditorUtility.DisplayDialogComplex("ASSERT", liteMessage, "Continue", "Mute", null);
 		}
 		else
+#endif
 		{
 			if (Debugger.IsAttached)
 				result = 2;
@@ -58,6 +61,7 @@ public class AssertRecord
 		{
 			// Continue
 			case 0:
+				UnityEngine.Debug.Log("ASSERT: " + liteMessage + "\n" + fullMessage);
 				break;
 
 			// Mute
