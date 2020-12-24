@@ -4,65 +4,69 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public static class ElementSerializer
+
+namespace DQR.Types
 {
-	/// <summary>
-	/// Wrapper function which will safely serialize a block of elements using SerializationChunk
-	/// Assumes elements is a static collection to read data from or write data to
-	/// </summary>
-	public static void Serialize(SerializationStream stream, IEnumerable<ISerializableElement> elements)
+	public static class ElementSerializer
 	{
-		AssertNonUniqueKeys(elements);
-
-		if (stream.Mode == SerializationMode.Read)
+		/// <summary>
+		/// Wrapper function which will safely serialize a block of elements using SerializationChunk
+		/// Assumes elements is a static collection to read data from or write data to
+		/// </summary>
+		public static void Serialize(SerializationStream stream, IEnumerable<ISerializableElement> elements)
 		{
-			byte[] data = null;
-			stream.SerializeBlock(ref data);
-			MemoryStream dataStream = new MemoryStream(data);
+			AssertNonUniqueKeys(elements);
 
-			using (var groupStream = new GroupSerializationStream(dataStream, stream.Mode))
+			if (stream.Mode == SerializationMode.Read)
 			{
-				foreach (var elem in elements)
+				byte[] data = null;
+				stream.SerializeBlock(ref data);
+				MemoryStream dataStream = new MemoryStream(data);
+
+				using (var groupStream = new GroupSerializationStream(dataStream, stream.Mode))
 				{
-					if (groupStream.OpenSerializationStream(elem.SerializationKey, out SerializationStream elemStream))
+					foreach (var elem in elements)
 					{
-						int version = elem.SerializationVersion;
-						elemStream.Serialize(ref version);
-						elem.SerializeElement(elemStream, version);
+						if (groupStream.OpenSerializationStream(elem.SerializationKey, out SerializationStream elemStream))
+						{
+							int version = elem.SerializationVersion;
+							elemStream.Serialize(ref version);
+							elem.SerializeElement(elemStream, version);
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			MemoryStream dataStream = new MemoryStream();
-
-			using (var groupStream = new GroupSerializationStream(dataStream, stream.Mode))
+			else
 			{
-				foreach (var elem in elements)
+				MemoryStream dataStream = new MemoryStream();
+
+				using (var groupStream = new GroupSerializationStream(dataStream, stream.Mode))
 				{
-					if (elem.ShouldSerializationExport && groupStream.OpenSerializationStream(elem.SerializationKey, out SerializationStream elemStream))
+					foreach (var elem in elements)
 					{
-						int version = elem.SerializationVersion;
-						elemStream.Serialize(ref version);
-						elem.SerializeElement(elemStream, version);
+						if (elem.ShouldSerializationExport && groupStream.OpenSerializationStream(elem.SerializationKey, out SerializationStream elemStream))
+						{
+							int version = elem.SerializationVersion;
+							elemStream.Serialize(ref version);
+							elem.SerializeElement(elemStream, version);
+						}
 					}
 				}
+
+				byte[] data = dataStream.ToArray();
+				stream.SerializeBlock(ref data);
 			}
-
-			byte[] data = dataStream.ToArray();
-			stream.SerializeBlock(ref data);
 		}
-	}
 
-	public static void AssertNonUniqueKeys(IEnumerable<ISerializableElement> elements)
-	{
+		public static void AssertNonUniqueKeys(IEnumerable<ISerializableElement> elements)
+		{
 #if UNITY_ASSERTIONS
-		var groupedElems = elements.GroupBy((e) => e.SerializationKey);
-		foreach (var group in groupedElems.Where((g) => g.Count() != 1))
-		{
-			Debug.AssertFormat(false, "Found duplicate serialization keys in the same group for '{0}'", group.Key);
-		}
+			var groupedElems = elements.GroupBy((e) => e.SerializationKey);
+			foreach (var group in groupedElems.Where((g) => g.Count() != 1))
+			{
+				Debug.AssertFormat(false, "Found duplicate serialization keys in the same group for '{0}'", group.Key);
+			}
 #endif
+		}
 	}
 }
