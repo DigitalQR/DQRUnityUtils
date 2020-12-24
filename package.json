@@ -1,7 +1,7 @@
 {
   "name": "com.dqr.utils",
   "displayName": "DigitalQR Utility Library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Just a growing utility library that covers a variety of needs",
   "unity": "2020.1",
   "keywords": [

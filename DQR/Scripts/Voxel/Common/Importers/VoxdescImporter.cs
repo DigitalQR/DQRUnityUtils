@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Experimental.AssetImporters;
+
 using UnityEngine;
 
 using DQR.Voxel;
@@ -10,6 +10,7 @@ using DQR.Voxel.Common;
 using DQR.Models;
 using DQR.Types;
 using UnityEditor;
+using UnityEditor.Experimental.AssetImporters;
 
 [ScriptedImporter(1, "voxdesc")]
 public class VoxdescImporter : ScriptedImporter
