@@ -81,9 +81,17 @@ namespace DQR.EZInspect
 			}
 			else
 			{
-				inspector.BeginWindow(m_ShortTitle, m_Props.InitialPosition, m_Props.InitialSize);
-				m_Listener.OnInspect(inspector);
-				inspector.EndWindow();
+				bool open = true;
+				if (inspector.BeginWindow(m_ShortTitle, m_Props.InitialPosition, m_Props.InitialSize, ref open))
+				{
+					m_Listener.OnInspect(inspector);
+					inspector.EndWindow();
+				}
+
+				if(!open)
+				{
+					inspector.IsOverlayActive = false;
+				}
 			}
 		}
 	}
