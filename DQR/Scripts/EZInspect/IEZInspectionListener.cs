@@ -10,6 +10,7 @@ namespace DQR.EZInspect
 		public Vector2 InitialPosition;
 		public Vector2 InitialSize;
 		public bool ManuallyHandleAllRendering;
+		public bool IsHiddenByDefault;
 
 		public InspectionProperties()
 		{
@@ -17,6 +18,7 @@ namespace DQR.EZInspect
 			InitialPosition = new Vector2(5, 5);
 			InitialSize = new Vector2(560, 310);
 			ManuallyHandleAllRendering = false;
+			IsHiddenByDefault = true;
 		}
 	}
 

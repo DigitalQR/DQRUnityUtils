@@ -6,6 +6,8 @@ using UnityEngine.Assertions;
 
 namespace DQR
 {
+	public class AssertLogCategory : LogCategory { }
+
 	public static class Assert
 	{
 		private static void LogAssertion(string msg)

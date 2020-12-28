@@ -14,10 +14,14 @@ using DQR.Types;
 
 namespace DQR.EZInspect
 {
+	public class EZInspectLogCategory : LogCategory{ } 
+
 	public class EZInspector : SingletonBehaviour<EZInspector>, IEZInspectionListener
 	{
 		[SerializeField]
 		private float m_BaseResolutionWidth = 1920;
+
+		private bool m_HideAll = false;
 
 		private bool m_ResolutionJustChanged = false;
 		private bool m_WindowSettingsDirty = false;
@@ -47,30 +51,30 @@ namespace DQR.EZInspect
 
 		private Vector2Int LastKnownResolution
 		{
-			get => new Vector2Int(PlayerPrefs.GetInt("EZInspect.LastKnownRes.x", 0), PlayerPrefs.GetInt("EZInspect.LastKnownRes.y", 0));
+			get => new Vector2Int(PlayerPrefs.GetInt("DQR.EZInspect.LastKnownRes.x", 0), PlayerPrefs.GetInt("DQR.EZInspect.LastKnownRes.y", 0));
 			set
 			{
-				PlayerPrefs.SetInt("EZInspect.LastKnownRes.x", value.x);
-				PlayerPrefs.SetInt("EZInspect.LastKnownRes.y", value.y);
+				PlayerPrefs.SetInt("DQR.EZInspect.LastKnownRes.x", value.x);
+				PlayerPrefs.SetInt("DQR.EZInspect.LastKnownRes.y", value.y);
 			}
 		}
 
 		private float FontScale
 		{
-			get => PlayerPrefs.GetFloat("EZInspect.FontScale", 1.0f);
-			set => PlayerPrefs.SetFloat("EZInspect.FontScale", value);
+			get => PlayerPrefs.GetFloat("DQR.EZInspect.FontScale", 1.0f);
+			set => PlayerPrefs.SetFloat("DQR.EZInspect.FontScale", value);
 		}
 
 		private bool ResetOnResolutionScale
 		{
-			get => PlayerPrefs.GetInt("EZInspect.ResetOnResolution", 1) == 1;
-			set => PlayerPrefs.SetInt("EZInspect.ResetOnResolution", value ? 1 : 0);
+			get => PlayerPrefs.GetInt("DQR.EZInspect.ResetOnResolution", 1) == 1;
+			set => PlayerPrefs.SetInt("DQR.EZInspect.ResetOnResolution", value ? 1 : 0);
 		}
 
 		private bool ApplyResolutionScale
 		{
-			get => PlayerPrefs.GetInt("EZInspect.ApplyResolutionScale", 1) == 1;
-			set => PlayerPrefs.SetInt("EZInspect.ApplyResolutionScale", value ? 1 : 0);
+			get => PlayerPrefs.GetInt("DQR.EZInspect.ApplyResolutionScale", 1) == 1;
+			set => PlayerPrefs.SetInt("DQR.EZInspect.ApplyResolutionScale", value ? 1 : 0);
 		}
 
 		public float RenderResolutionScale
@@ -78,7 +82,7 @@ namespace DQR.EZInspect
 			get => (ApplyResolutionScale ? (float)Screen.width / m_BaseResolutionWidth : 1.0f);
 		}
 				
-		public bool IsOverlayActive
+		public bool IsInspectorActive
 		{
 			get
 			{
@@ -104,7 +108,7 @@ namespace DQR.EZInspect
 
 				if (m_WindowSettingsDirty || currentResolution != LastKnownResolution)
 				{
-					Debug.Log("DebugMenu: Resolution change detected");
+					Log.Info<EZInspectLogCategory>("Resolution change detected");
 					m_ResolutionJustChanged = true;
 					m_WindowSettingsDirty = false;
 					LastKnownResolution = currentResolution;
@@ -116,9 +120,10 @@ namespace DQR.EZInspect
 			ImGui.GetIO().ConfigDockingTransparentPayload = true;
 			ImGui.DockSpaceOverViewport(ImGui.GetMainViewport() ,ImGuiDockNodeFlags.PassthruCentralNode);
 
-			foreach (var inspect in m_InspectListeners.Values)
+			foreach (var kvp in m_InspectListeners)
 			{
-				if (inspect.IsActive)
+				var inspect = kvp.Value;
+				if ((!m_HideAll || kvp.Key.Equals(this)) && inspect.IsActive)
 				{
 					inspect.OnInspect(this);
 				}
@@ -162,15 +167,15 @@ namespace DQR.EZInspect
 			}
 		}
 		
-		public bool BeginWindow(string name, Vector2 initPos, Vector2 initSize, ref bool open)
+		public bool BeginWindow(string name, Vector2 initPos, Vector2 initSize)
 		{
 			ImGuiCond propCondition = m_ResolutionJustChanged ? ImGuiCond.Always : ImGuiCond.FirstUseEver;
-
-			ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+			
 			ImGui.SetNextWindowPos(initPos * RenderResolutionScale, propCondition);
 			ImGui.SetNextWindowSize(initSize * RenderResolutionScale, propCondition);
-			
-			return ImGui.Begin(name, ref open);
+
+			bool open = true;
+			return ImGui.Begin(name, ref open, ImGuiWindowFlags.NoCollapse) && open;
 		}
 
 		public void EndWindow()
@@ -180,7 +185,7 @@ namespace DQR.EZInspect
 
 		private void OnOpenEZInspector()
 		{
-			IsOverlayActive = !IsOverlayActive;
+			IsInspectorActive = !IsInspectorActive;
 		}
 
 #region Inspector Overlay
@@ -189,7 +194,7 @@ namespace DQR.EZInspect
 		public InspectionProperties GetInspectProperties()
 		{
 			InspectionProperties props = new InspectionProperties();
-			props.ManuallyHandleAllRendering = true;
+			props.TitleOverride = "EZInspector";
 			return props;
 		}
 
@@ -206,73 +211,72 @@ namespace DQR.EZInspect
 			if (inspector != this)
 				return;
 
-			bool open = true;
-			if (BeginWindow("EZInspector", new Vector2(5, 770), new Vector2(330, 300), ref open))
+			ImGui.Checkbox("Hide All", ref m_HideAll);
+
+			ImGui.BeginTabBar("##inspector_tabs");
+			if (ImGui.BeginTabItem("Inspectors"))
 			{
-				ImGui.BeginTabBar("##inspector_tabs");
+				ImGui.InputText("Filter", ref m_SearchFilter, 1024);
+				ImGui.Text("Registered " + (m_InspectListeners.Count - 1) + " inspectors");
+				ImGui.Spacing();
 
-				if (ImGui.BeginTabItem("Inspectors"))
+				ImGui.BeginChild("scroll_area");
+
+				foreach (var kvp in m_InspectListeners)
 				{
-					ImGui.InputText("Filter", ref m_SearchFilter, 1024);
-					ImGui.Text("Registered " + (m_InspectListeners.Count - 1) + " inspectors");
-					ImGui.Spacing();
+					if (kvp.Key.Equals(this))
+						continue;
 
-					ImGui.BeginChild("scroll_area");
+					var inspect = kvp.Value;
+					string inspectName = inspect.FullTitle;
+
+					if (ContainedInSearchFilter(inspectName))
+					{
+						bool visible = inspect.IsActive;
+						if (ImGui.Checkbox(inspectName, ref visible))
+						{
+							inspect.IsActive = visible;
+						}
+					}
+				}
+
+				ImGui.EndChild();
+				ImGui.EndTabItem();
+			}
+
+			if (ImGui.BeginTabItem("Settings"))
+			{
+				float fontScale = FontScale;
+				bool resetOnResolutionScale = ResetOnResolutionScale;
+
+				ImGui.SliderFloat("Font Scale", ref fontScale, 0.01f, 10.0f);
+				ImGui.Checkbox("Reset on Resolution Change", ref resetOnResolutionScale);
+
+				if (ImGui.Button("Reset Windows"))
+				{
+					m_WindowSettingsDirty = true;
 
 					foreach (var kvp in m_InspectListeners)
 					{
-						if (kvp.Key.Equals(this))
-							continue;
-
-						var inspect = kvp.Value;
-						string inspectName = inspect.FullTitle;
-
-						if (ContainedInSearchFilter(inspectName))
-						{
-							bool visible = inspect.IsActive;
-							if (ImGui.Checkbox(inspectName, ref visible))
-							{
-								inspect.IsActive = visible;
-							}
-						}
+						if(!kvp.Key.Equals(this))
+							kvp.Value.IsActive = false;
 					}
-
-					ImGui.EndChild();
-					ImGui.EndTabItem();
 				}
+				ImGui.SameLine();
 
-				if (ImGui.BeginTabItem("Settings"))
+				if (ImGui.Button("Reset Prefs"))
 				{
-					float fontScale = FontScale;
-					bool resetOnResolutionScale = ResetOnResolutionScale;
-
-					ImGui.SliderFloat("Font Scale", ref fontScale, 0.01f, 10.0f);
-					ImGui.Checkbox("Reset on Resolution Change", ref resetOnResolutionScale);
-
-					if (ImGui.Button("Reset Windows"))
-					{
-						m_WindowSettingsDirty = true;
-					}
-					ImGui.SameLine();
-
-					if (ImGui.Button("Reset Prefs"))
-					{
-						fontScale = 1.0f;
-						resetOnResolutionScale = true;
-					}
-
-					FontScale = fontScale;
-					ResetOnResolutionScale = resetOnResolutionScale;
-
-					ImGui.EndTabItem();
+					fontScale = 1.0f;
+					resetOnResolutionScale = true;
 				}
 
-				ImGui.EndTabBar();
-				EndWindow();
+				FontScale = fontScale;
+				ResetOnResolutionScale = resetOnResolutionScale;
+
+				ImGui.EndTabItem();
 			}
 
-			if (!open)
-				IsOverlayActive = false;
+			ImGui.EndTabBar();
 		}
 #endregion
 	}

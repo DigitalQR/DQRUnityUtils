@@ -30,7 +30,7 @@ namespace DQR.Types
 			if (!IsValid)
 			{
 				s_Instance = this as T;
-				UnityEngine.Debug.LogFormat("Singleton '{0}:{1}' registered", typeof(T).Name, gameObject.name);
+				Log.Info<DefaultLogCategory>("Singleton '{0}:{1}' registered", typeof(T).Name, gameObject.name);
 				SingletonInit();
 			}
 			else
@@ -45,7 +45,7 @@ namespace DQR.Types
 			if (s_Instance == this)
 			{
 				s_Instance = null;
-				UnityEngine.Debug.LogFormat("Singleton '{0}:{1}' destroyed", typeof(T).Name, gameObject.name);
+				Log.Info<DefaultLogCategory>("Singleton '{0}:{1}' destroyed", typeof(T).Name, gameObject.name);
 				SingletonDestruct();
 			}
 		}

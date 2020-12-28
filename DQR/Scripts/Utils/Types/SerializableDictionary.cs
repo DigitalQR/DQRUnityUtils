@@ -67,7 +67,7 @@ namespace DQR.Types
 			{
 				if(m_Elements.Where((kvp) => kvp.Key.Equals(m_TemporaryKVP.Key)).Any())
 				{
-					UnityEngine.Debug.LogWarning("Duplicate key added to Dictionary (overriding existing)");
+					Log.Warning<DefaultLogCategory>("Duplicate key added to Dictionary (overriding existing)");
 				}
 
 				m_Elements.Add(m_TemporaryKVP);

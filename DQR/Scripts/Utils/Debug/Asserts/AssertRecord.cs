@@ -32,8 +32,8 @@ public class AssertRecord
 		string liteMessage = "Assert: '" + m_Message + "' @(" + m_FilePath + ":" + m_LineNumber + ")";
 		string fullMessage = liteMessage + "\n\t" + GetFormattedStackTrace(trace, true);
 		
-		UnityEngine.Debug.LogFormat(LogType.Assert, LogOption.None, null, fullMessage);
-
+		Log.Error<AssertLogCategory>(fullMessage);
+		
 		if (m_IsMuted)
 			return;
 
@@ -61,7 +61,6 @@ public class AssertRecord
 		{
 			// Continue
 			case 0:
-				UnityEngine.Debug.Log("ASSERT: " + liteMessage + "\n" + fullMessage);
 				break;
 
 			// Mute
