@@ -44,7 +44,7 @@ namespace DQR.EZInspect
 			// Toggle with '`'
 			if (Input.GetKeyDown(KeyCode.BackQuote))
 			{
-				IsOverlayActive = !IsOverlayActive;
+				OnOpenEZInspector();
 			}
 		}
 #endif
