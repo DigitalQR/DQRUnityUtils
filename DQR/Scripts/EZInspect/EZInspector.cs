@@ -26,6 +26,11 @@ namespace DQR.EZInspect
 		private bool m_ResolutionJustChanged = false;
 		private bool m_WindowSettingsDirty = false;
 
+		private PropertyPrefVector2Int m_LastKnownResolution = new PropertyPrefVector2Int("DQR.EZInspect.LastKnownRes", Vector2Int.zero);
+		private PropertyPrefFloat m_FontScale = new PropertyPrefFloat("DQR.EZInspect.FontScale", 1.0f);
+		private PropertyPrefBool m_ResetOnResolutionScale = new PropertyPrefBool("DQR.EZInspect.ResetOnResolution", true);
+		private PropertyPrefBool m_ApplyResolutionScale = new PropertyPrefBool("DQR.EZInspect.ApplyResolutionScale", true);
+
 		private Dictionary<IEZInspectionListener, EZInspectionListenerContainer> m_InspectListeners = new Dictionary<IEZInspectionListener, EZInspectionListenerContainer>();
 		
 		protected override void SingletonInit()
@@ -48,38 +53,10 @@ namespace DQR.EZInspect
 			}
 		}
 #endif
-
-		private Vector2Int LastKnownResolution
-		{
-			get => new Vector2Int(PlayerPrefs.GetInt("DQR.EZInspect.LastKnownRes.x", 0), PlayerPrefs.GetInt("DQR.EZInspect.LastKnownRes.y", 0));
-			set
-			{
-				PlayerPrefs.SetInt("DQR.EZInspect.LastKnownRes.x", value.x);
-				PlayerPrefs.SetInt("DQR.EZInspect.LastKnownRes.y", value.y);
-			}
-		}
-
-		private float FontScale
-		{
-			get => PlayerPrefs.GetFloat("DQR.EZInspect.FontScale", 1.0f);
-			set => PlayerPrefs.SetFloat("DQR.EZInspect.FontScale", value);
-		}
-
-		private bool ResetOnResolutionScale
-		{
-			get => PlayerPrefs.GetInt("DQR.EZInspect.ResetOnResolution", 1) == 1;
-			set => PlayerPrefs.SetInt("DQR.EZInspect.ResetOnResolution", value ? 1 : 0);
-		}
-
-		private bool ApplyResolutionScale
-		{
-			get => PlayerPrefs.GetInt("DQR.EZInspect.ApplyResolutionScale", 1) == 1;
-			set => PlayerPrefs.SetInt("DQR.EZInspect.ApplyResolutionScale", value ? 1 : 0);
-		}
-
+		
 		public float RenderResolutionScale
 		{
-			get => (ApplyResolutionScale ? (float)Screen.width / m_BaseResolutionWidth : 1.0f);
+			get => (m_ApplyResolutionScale ? (float)Screen.width / m_BaseResolutionWidth : 1.0f);
 		}
 				
 		public bool IsInspectorActive
@@ -106,17 +83,17 @@ namespace DQR.EZInspect
 
 				Vector2Int currentResolution = new Vector2Int(Screen.width, Screen.height);
 
-				if (m_WindowSettingsDirty || currentResolution != LastKnownResolution)
+				if (m_WindowSettingsDirty || currentResolution != m_LastKnownResolution)
 				{
 					Log.Info<EZInspectLogCategory>("Resolution change detected");
 					m_ResolutionJustChanged = true;
 					m_WindowSettingsDirty = false;
-					LastKnownResolution = currentResolution;
+					m_LastKnownResolution.Set(currentResolution);
 				}
 			}
 			
 			// Render overlays
-			ImGui.GetIO().FontGlobalScale = FontScale;
+			ImGui.GetIO().FontGlobalScale = m_FontScale;
 			ImGui.GetIO().ConfigDockingTransparentPayload = true;
 			ImGui.DockSpaceOverViewport(ImGui.GetMainViewport() ,ImGuiDockNodeFlags.PassthruCentralNode);
 
@@ -246,8 +223,8 @@ namespace DQR.EZInspect
 
 			if (ImGui.BeginTabItem("Settings"))
 			{
-				float fontScale = FontScale;
-				bool resetOnResolutionScale = ResetOnResolutionScale;
+				float fontScale = m_FontScale;
+				bool resetOnResolutionScale = m_ResetOnResolutionScale;
 
 				ImGui.SliderFloat("Font Scale", ref fontScale, 0.01f, 10.0f);
 				ImGui.Checkbox("Reset on Resolution Change", ref resetOnResolutionScale);
@@ -270,8 +247,8 @@ namespace DQR.EZInspect
 					resetOnResolutionScale = true;
 				}
 
-				FontScale = fontScale;
-				ResetOnResolutionScale = resetOnResolutionScale;
+				m_FontScale.Set(fontScale);
+				m_ResetOnResolutionScale.Set(resetOnResolutionScale);
 
 				ImGui.EndTabItem();
 			}

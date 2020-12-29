@@ -36,7 +36,7 @@ namespace DQR.EZInspect
 					{
 						bool console = category.ShouldLogToConsole;
 						ImGui.Checkbox(category.GetCategoryName(), ref console);
-						category.ShouldLogToConsole = console;
+						category.ShouldLogToConsole.Set(console);
 					}
 
 					ImGui.EndCombo();

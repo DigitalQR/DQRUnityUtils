@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using DQR.Types;
+
 namespace DQR
 {
 	public enum LogMessageType
@@ -18,24 +20,17 @@ namespace DQR
 			get => "DQR.Log." + GetType().Name;
 		}
 
-		public bool ShouldLogToFile
-		{
-			get => PlayerPrefs.GetInt(PlayerPrefPrefix + ".LogToFile", 1) == 1;
-			set => PlayerPrefs.SetInt(PlayerPrefPrefix + ".LogToFile", value ? 1 : 0);
-		}
+		public PropertyPrefBool ShouldLogToFile { get; private set; }
+		public PropertyPrefBool ShouldLogToConsole { get; private set; }
+		public PropertyPrefBool ShouldLogToUnityOutput { get; private set; }
 
-		public bool ShouldLogToConsole
+		public LogCategory()
 		{
-			get => PlayerPrefs.GetInt(PlayerPrefPrefix + ".LogToConsole", 1) == 1;
-			set => PlayerPrefs.SetInt(PlayerPrefPrefix + ".LogToConsole", value ? 1 : 0);
+			ShouldLogToFile = new PropertyPrefBool(PlayerPrefPrefix + ".LogToFile", true);
+			ShouldLogToConsole = new PropertyPrefBool(PlayerPrefPrefix + ".LogToConsole", true);
+			ShouldLogToUnityOutput = new PropertyPrefBool(PlayerPrefPrefix + ".LogToUnityOutput", true);
 		}
-
-		public bool ShouldLogToUnityOutput
-		{
-			get => PlayerPrefs.GetInt(PlayerPrefPrefix + ".LogToUnityOutput", 0) == 1;
-			set => PlayerPrefs.SetInt(PlayerPrefPrefix + ".LogToUnityOutput", value ? 1 : 0);
-		}
-
+		
 		public virtual string GetCategoryName()
 		{
 			string typeName = GetType().Name;
@@ -49,7 +44,7 @@ namespace DQR
 			return Color.green;
 		}
 
-		public void HandleMessage(LogMessageType logType, string message)
+		public virtual void HandleMessage(LogMessageType logType, string message)
 		{
 			if (ShouldLogToFile)
 			{

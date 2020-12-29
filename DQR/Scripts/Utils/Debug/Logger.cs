@@ -58,24 +58,34 @@ namespace DQR
 
 		#region Log Message
 		private const int c_LogCapacity = 1024 * 8;
+		private static object s_LogBufferLock = new object();
 		private static LogMessage[] s_LogBuffer = new LogMessage[c_LogCapacity];
 		private static int s_LogTailIndex = 0;
 
 		public static IEnumerable<LogMessage> GetLogMessages()
 		{
-			return (s_LogBuffer.Skip(s_LogTailIndex).Union(s_LogBuffer.Take(s_LogTailIndex))).Where((msg) => msg.Category != null);
+			lock (s_LogBufferLock)
+			{
+				return (s_LogBuffer.Skip(s_LogTailIndex).Union(s_LogBuffer.Take(s_LogTailIndex))).Where((msg) => msg.Category != null);
+			}
 		}
 
 		internal static void LogInternal(LogMessage message)
 		{
-			s_LogBuffer[s_LogTailIndex] = message;
-			s_LogTailIndex = (s_LogTailIndex + 1) % c_LogCapacity;
+			lock (s_LogBufferLock)
+			{
+				s_LogBuffer[s_LogTailIndex] = message;
+				s_LogTailIndex = (s_LogTailIndex + 1) % c_LogCapacity;
+			}
 		}
 
 		public static void Clear()
 		{
-			s_LogBuffer = new LogMessage[c_LogCapacity];
-			s_LogTailIndex = 0;
+			lock (s_LogBufferLock)
+			{
+				s_LogBuffer = new LogMessage[c_LogCapacity];
+				s_LogTailIndex = 0;
+			}
 		}
 		#endregion
 

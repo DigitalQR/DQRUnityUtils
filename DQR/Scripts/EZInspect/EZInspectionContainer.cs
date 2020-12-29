@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using DQR.Types;
 
 namespace DQR.EZInspect
 {
@@ -35,6 +36,7 @@ namespace DQR.EZInspect
 		private IEZInspectionListener m_Listener;
 		private InspectionProperties m_Props;
 
+		private PropertyPrefBool m_IsInspectorActive;
 		private string m_FullTitle;
 		private string m_ShortTitle;
 
@@ -49,6 +51,7 @@ namespace DQR.EZInspect
 				m_ShortTitle = m_Props.TitleOverride;
 
 			m_FullTitle = context.name + "." + m_ShortTitle;
+			m_IsInspectorActive = new PropertyPrefBool("DQR.EZInspect." + m_FullTitle + ".Active", m_Props.IsHiddenByDefault);
 		}
 
 		public string FullTitle
@@ -63,12 +66,8 @@ namespace DQR.EZInspect
 		
 		public bool IsActive
 		{
-			get => PlayerPrefs.GetInt("DQR.EZInspect." + m_FullTitle + ".Active", m_Props.IsHiddenByDefault ? 0 : 1) == 1;
-			set
-			{
-				PlayerPrefs.SetInt("DQR.EZInspect." + m_FullTitle + ".Active", value ? 1 : 0);
-				Log.Info<EZInspectLogCategory>("'{0}' active:{1}", m_FullTitle, value);
-			}
+			get => m_IsInspectorActive;
+			set => m_IsInspectorActive.Set(value);
 		}
 
 		public void OnInspect(EZInspector inspector)
