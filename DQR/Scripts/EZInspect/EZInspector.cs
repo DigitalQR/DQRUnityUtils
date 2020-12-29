@@ -26,16 +26,21 @@ namespace DQR.EZInspect
 		private bool m_ResolutionJustChanged = false;
 		private bool m_WindowSettingsDirty = false;
 
-		private PropertyPrefVector2Int m_LastKnownResolution = new PropertyPrefVector2Int("DQR.EZInspect.LastKnownRes", Vector2Int.zero);
-		private PropertyPrefFloat m_FontScale = new PropertyPrefFloat("DQR.EZInspect.FontScale", 1.0f);
-		private PropertyPrefBool m_ResetOnResolutionScale = new PropertyPrefBool("DQR.EZInspect.ResetOnResolution", true);
-		private PropertyPrefBool m_ApplyResolutionScale = new PropertyPrefBool("DQR.EZInspect.ApplyResolutionScale", true);
+		private PropertyPrefVector2Int m_LastKnownResolution;
+		private PropertyPrefFloat m_FontScale;
+		private PropertyPrefBool m_ResetOnResolutionScale;
+		private PropertyPrefBool m_ApplyResolutionScale;
 
 		private Dictionary<IEZInspectionListener, EZInspectionListenerContainer> m_InspectListeners = new Dictionary<IEZInspectionListener, EZInspectionListenerContainer>();
 		
 		protected override void SingletonInit()
 		{
-			SetupListenerContainerIfRequired(gameObject);
+			m_LastKnownResolution = new PropertyPrefVector2Int("DQR.EZInspect.LastKnownRes", Vector2Int.zero);
+			m_FontScale = new PropertyPrefFloat("DQR.EZInspect.FontScale", 1.0f);
+			m_ResetOnResolutionScale = new PropertyPrefBool("DQR.EZInspect.ResetOnResolution", true);
+			m_ApplyResolutionScale = new PropertyPrefBool("DQR.EZInspect.ApplyResolutionScale", true);
+
+		SetupListenerContainerIfRequired(gameObject);
 			ImGuiUn.Layout += OnImGuiLayout;
 
 #if UNITY_EDITOR
