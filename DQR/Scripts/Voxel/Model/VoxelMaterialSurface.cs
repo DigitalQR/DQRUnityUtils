@@ -47,4 +47,25 @@ namespace DQR.Voxel.Model
 			return m_FaceProperties[face].Material;
 		}
 	}
+
+	public class VoxelMaterialSurfaceResolver : VoxelMaterialResolverBase
+	{
+		private ResourceMappedCellTable<VoxelMaterialSurface> m_Table;
+
+		public VoxelMaterialSurfaceResolver(ResourceMappedCellTable<VoxelMaterialSurface> table)
+		{
+			m_Table = table;
+		}
+		
+		public override VoxelMaterial GetMaterialForInput(Vector3Int fromCoord, VoxelCell fromCell, Vector3Int toCoord, VoxelCell toCell)
+		{
+			VoxelFace face = VoxelFaceHelpers.NormalToFace(toCoord - fromCoord);
+
+			var surface = m_Table.CellToResource(fromCell);
+			if (surface != null)
+				return surface.GetMaterialForFace(face);
+
+			return null;
+		}
+	}
 }

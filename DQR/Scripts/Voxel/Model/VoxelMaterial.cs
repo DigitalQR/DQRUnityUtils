@@ -74,10 +74,6 @@ namespace DQR.Voxel.Model
 			m_Table = table;
 		}
 
-		public Texture2D GenerateMaterialTexture()
-		{
-			return GenerateMaterialTexture(m_Table);
-		}
 
 		public override VoxelMaterial GetMaterialForInput(Vector3Int fromCoord, VoxelCell fromCell, Vector3Int toCoord, VoxelCell toCell)
 		{
