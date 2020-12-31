@@ -22,6 +22,21 @@ namespace DQR
 		}
 
 #if UNITY_EDITOR
+		public static void EnsureAssetDirectoryExists(string path)
+		{
+			string[] parts = path.Replace('\\', '/').Split('/');
+			string currDir = parts[0];
+
+			for (int i = 1; i < parts.Length; ++i)
+			{
+				string dir = System.IO.Path.Combine(currDir, parts[i]);
+				if (!AssetDatabase.IsValidFolder(dir))
+					AssetDatabase.CreateFolder(currDir, parts[i]);
+
+				currDir = dir;
+			}
+		}
+
 		[InitializeOnLoadMethod]
 		static void SetupLibrary()
 		{

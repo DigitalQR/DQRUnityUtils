@@ -73,6 +73,8 @@ namespace DQR.Voxel.Model
 	[System.Serializable]
 	public class VoxelMaterialLayout : ScriptableObject, ISerializationCallbackReceiver
 	{
+		private const string c_ShaderGraphTemplateAssetPath = "Assets\\DQR\\Library\\Voxel\\Shaders\\TEMPLATE_GetVoxelMaterial.shadersubgraph";
+
 		[SerializeField]
 		private VoxelMaterialLayoutDesc[] m_Layouts = null;
 		private int m_ChannelCount = 0;
@@ -114,31 +116,125 @@ namespace DQR.Voxel.Model
 			string sourcePath = AssetDatabase.GetAssetPath(this);
 			string sourceDir = Path.GetDirectoryName(sourcePath);
 			string assetName = Path.GetFileNameWithoutExtension(sourcePath);
-
-			string shaderPath = Path.Combine(sourceDir, assetName + ".hlsl");
-			TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(shaderPath);
-
+			
+			string shaderGraphPath = Path.Combine(sourceDir, "Generated", "GetVoxelMaterial_" + assetName + ".shadersubgraph");
+			
 			if (m_GenerateShaderCode)
 			{
 				string sourceCode = GenerateShaderCode(assetName);
 
-				if (textAsset == null)
+				var shaderGraph = AssetDatabase.LoadAssetAtPath<Object>(shaderGraphPath);
+				if (shaderGraph == null)
 				{
-					textAsset = new TextAsset(sourceCode);
-					AssetDatabase.CreateAsset(textAsset, shaderPath);
+					DQRUtils.EnsureAssetDirectoryExists(Path.GetDirectoryName(shaderGraphPath));
+					AssetDatabase.CopyAsset(c_ShaderGraphTemplateAssetPath, shaderGraphPath);
 				}
-				else if (textAsset.text != sourceCode)
+
+				// Manually tweak the the asset file
+				string sourceAsset = File.ReadAllText(shaderGraphPath);
+				string generatedAsset = FixupTemplate(assetName, File.ReadAllText(c_ShaderGraphTemplateAssetPath));
+
+				if (sourceAsset != generatedAsset)
 				{
-					File.WriteAllText(shaderPath, sourceCode);
-					AssetDatabase.ImportAsset(shaderPath);
+					File.WriteAllText(shaderGraphPath, generatedAsset);
+					AssetDatabase.ImportAsset(shaderGraphPath);
 				}
-			}
-			else
-			{
-				AssetDatabase.DeleteAsset(shaderPath);
 			}
 		}
-		
+
+		private const int c_MaxSupportedTemplateParams = 16;
+
+		private string FixupTemplate(string assetName, string source)
+		{
+			string splitKey = "\n}\n";
+			string[] parts = source.Replace("\r\n", "\n").Replace(splitKey, "£").Split('£');
+			List<string> outputParts = new List<string>();
+
+			// Fix up inputs
+			List<string> removedGuids = new List<string>();
+
+			foreach (var it in parts)
+			{
+				string part = it;
+
+				for (int i = 0; i < c_MaxSupportedTemplateParams; ++i)
+				{
+					if (part.Contains($"\"m_ShaderOutputName\": \"_output_{i}_\""))
+					{
+						// Store guid
+						int guidIndex = part.IndexOf("\"m_ObjectId\":");
+						string guidString = "";
+						Assert.Message(guidIndex != 0, "Failed to locate m_ObjectId");
+
+						if (guidIndex != 0)
+						{
+							guidString = part.Substring(guidIndex).Split(':')[1].Split(',')[0].Trim();
+						}	
+
+						if (i < m_Layouts.Length)
+						{
+							var curr = m_Layouts[i];
+							part = part
+								.Replace($"_output_{i}_", curr.Identifier)
+								.Replace("UnityEditor.ShaderGraph.Vector1MaterialSlot", $"UnityEditor.ShaderGraph.Vector{curr.DataFormat.GetChannelCount()}MaterialSlot");
+						}
+						else
+						{
+							// placeholder is out of range
+							part = null;
+							removedGuids.Add(guidString);
+							break;
+						}
+					}
+				}
+
+				if(part != null)
+					outputParts.Add(part);
+			}
+			
+			for (int i = 0; i < outputParts.Count; ++i)
+			{
+				string part = outputParts[i];
+				
+				// Update slot references for any knowingly removed guids
+				if (part.Contains("m_Slots"))
+				{
+					// Replace main function body
+					part = part.Replace("_inner_func_", GenerateShaderCode(assetName).Replace("\r\n", "\n").Replace("\n", "\\n"));
+
+					// Remove slots with invalid guids
+					string startMarker = "\"m_Slots\": [";
+					int startIndex = part.IndexOf(startMarker);
+					Assert.Condition(startIndex != 0);
+
+					startIndex += startMarker.Length;
+
+					int endIndex = part.IndexOf(']', startIndex);
+					Assert.Condition(endIndex != 0);
+
+					string slotsArrayRaw = part.Substring(startIndex, endIndex - startIndex);
+					string[] slotsArray = slotsArrayRaw.Split(',');
+
+					List<string> outputSlots = new List<string>();
+
+					foreach (var slot in slotsArray)
+					{
+						bool isValid = !removedGuids.Where((g) => slot.Contains(g)).Any();
+
+						if (isValid)
+							outputSlots.Add(slot);
+					}
+
+					string newSlotsArray = string.Join(",", outputSlots);
+					part = part.Substring(0, startIndex) + newSlotsArray + part.Substring(endIndex);
+				}
+				
+				outputParts[i] = part;
+			}
+
+			return string.Join(splitKey, outputParts).Replace("\n", "\r\n");
+		}
+				
 		private string GenerateShaderCode(string assetName)
 		{
 			string GetFloatType(int count)
